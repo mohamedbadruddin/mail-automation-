@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mission Interface</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- GSAP Animation -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+
+  <!-- Howler.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.3/howler.min.js"></script>
+
+  <style>
+    body {
+      background-color: #000;
+      color: #00ff88;
+      font-family: 'Courier New', monospace;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    #binaryCanvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: -2;
+      width: 100vw;
+      height: 100vh;
+      background-color: #000;
+      opacity: 0.08;
+      pointer-events: none;
+    }
+
+    .binary-bg {
+      background-image: repeating-linear-gradient(
+        0deg,
+        transparent 0px,
+        transparent 14px,
+        rgba(0, 255, 136, 0.05) 14px,
+        rgba(0, 255, 136, 0.05) 16px
+      ),
+      repeating-linear-gradient(
+        90deg,
+        transparent 0px,
+        transparent 14px,
+        rgba(0, 255, 136, 0.05) 14px,
+        rgba(0, 255, 136, 0.05) 16px
+      );
+      background-color: #000;
+      box-shadow: 0 0 15px #00ff88;
+      border-radius: 0.75rem;
+    }
+
+    .glow {
+      text-shadow: 0 0 10px #00ff88, 0 0 20px #00ff88;
+    }
+
+    .spinner {
+      border: 6px solid #333;
+      border-top: 6px solid #00ff88;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body class="p-6">
+
+  <!-- Binary Canvas Background -->
+  <canvas id="binaryCanvas"></canvas>
+
+  <!-- Spinner Overlay -->
+  <div id="spinnerOverlay" class="fixed inset-0 bg-black bg-opacity-80 hidden items-center justify-center z-50">
+    <div class="spinner"></div>
+  </div>
+
+  <!-- Title -->
+  <h1 class="text-4xl font-bold glow text-center mb-8">MISSION INTERFACE</h1>
+
+  <!-- Form Container -->
+  <div class="max-w-xl mx-auto binary-bg p-6">
+    <form id="jobForm" enctype="multipart/form-data">
+      <label for="count" class="block font-semibold mb-2 glow">How many targets?</label>
+      <div class="flex gap-4 mb-4">
+        <input type="number" id="count" name="count" min="1" max="10" required class="flex-1 p-2 rounded bg-gray-900 text-green-300" />
+        <button type="button" id="generateFields" class="px-4 py-2 bg-green-500 text-black font-semibold rounded hover:bg-green-400">Deploy</button>
+      </div>
+
+      <div id="emailRows"></div>
+
+      <label for="resume" class="block font-semibold mb-2 glow">Resume Payload (PDF)</label>
+      <input type="file" id="resume" name="resume" accept=".pdf" required class="w-full p-2 rounded bg-gray-900 text-green-300 mb-4" />
+
+      <button type="submit" class="w-full py-3 bg-green-500 text-black font-bold rounded hover:bg-green-400">Execute</button>
+    </form>
+    <div id="responseMessage" class="mt-4 text-center font-semibold text-green-300 opacity-0 transition-opacity duration-500"></div>
+  </div>
+
+  <!-- Sound -->
+  <audio id="submitSound" src="https://assets.mixkit.co/sfx/preview/mixkit-fast-rocket-whoosh-1714.mp3"></audio>
+
+  <script>
+    // GSAP animation
+    gsap.from("form", {
+      duration: 1.5,
+      y: 50,
+      opacity: 0,
+      ease: "power2.out"
+    });
+
+    const countInput = document.getElementById('count');
+    const generateBtn = document.getElementById('generateFields');
+    const emailRows = document.getElementById('emailRows');
+    const form = document.getElementById('jobForm');
+    const responseMessage = document.getElementById('responseMessage');
+    const spinnerOverlay = document.getElementById('spinnerOverlay');
+    const submitSound = document.getElementById('submitSound');
+
+    generateBtn.addEventListener('click', () => {
+      emailRows.innerHTML = '';
+      const count = parseInt(countInput.value);
+      if (isNaN(count) || count < 1) return;
+
+      for (let i = 1; i <= count; i++) {
+        const row = document.createElement('div');
+        row.className = 'bg-gray-900 text-green-300 p-4 rounded-lg mb-4 shadow';
+        row.innerHTML = `
+          <label class="font-semibold glow">Email ${i}</label>
+          <input type="email" name="email${i}" required class="w-full p-2 rounded bg-black text-green-300 mb-2" />
+          <label class="font-semibold glow">Position ${i}</label>
+          <input type="text" name="position${i}" required class="w-full p-2 rounded bg-black text-green-300 mb-2" />
+          <label class="font-semibold glow">Message ${i}</label>
+          <textarea name="message${i}" required class="w-full p-2 rounded bg-black text-green-300 mb-2" rows="20">
+Respected Hiring Recruiter,
+
+I hope this email finds you well. My name is Mohamed Badruddin, and I am a 2025 passed-out B.Tech student from Crescent College of Engineering, Chennai, with a CGPA of 8.41 in Information Technology.
+
+As a passionate developer, I have developed a strong interest in programming languages, particularly Core Java and JavaScript. My skills include:
+
+- Core Java: Understanding the fundamentals of Java programming, including variables, data types, operators, control structures, methods, and OOP concepts.
+- JavaScript: Knowledge of JavaScript basics, including variables, data types, operators, control structures, functions, DOM manipulation, and event handling.
+- HTML, CSS, and MySQL: Familiarity with web development technologies and database management.
+
+I am confident in my ability to contribute to your organization and would welcome the opportunity to discuss my skills and qualifications further. I have attached my resume, which provides more details about my education, skills, and experience.
+
+Thank you for your time and consideration. I look forward to the opportunity to discuss my application.
+
+Best regards,  
+Mohamed Badruddin  
++91 8344886749
+          </textarea>
+          <button type="button" class="delete-btn px-3 py-1 bg-red-600 text-white rounded">Delete</button>
+        `;
+        emailRows.appendChild(row);
+      }
+
+      emailRows.querySelectorAll('.delete-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          btn.parentElement.remove();
+        });
+      });
+    });
+
+    form.addEventListener('submit', async function (e) {
+      e.preventDefault();
+      responseMessage.textContent = '';
+      responseMessage.classList.remove('opacity-100');
+      spinnerOverlay.classList.remove('hidden');
+      submitSound.play();
+
+      const formData = new FormData(form);
+
+      try {
+        const response = await fetch('http://localhost:5678/webhook-test/8a6fc32b-7e7b-412f-9b28-d3675733d636', {
+          method: 'POST',
+          body: formData
+        });
+
+        const message = await response.text();
+        spinnerOverlay.classList.add('hidden');
+        responseMessage.textContent = `✅ ${message}`;
+        responseMessage.classList.add('opacity-100');
+        form.reset();
+        emailRows.innerHTML = '';
+      } catch (error) {
+        spinnerOverlay.classList.add('hidden');
+        responseMessage.textContent = '❌ Transmission failed.';
+        responseMessage.classList.add('opacity-100');
+        console.error('Error:', error);
+      }
+    });
+
+
+    const canvas = document.getElementById("binaryCanvas");
+    const ctx = canvas.getContext("2d");
+
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const fontSize = 16;
+    const columns = Math.floor(canvas.width / fontSize);
+    const drops = Array(columns).fill(1);
+
+    function drawMatrix() {
+      ctx.fillStyle = "rgba(0, 0, 0, 0.1)";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      ctx.fillStyle = "#00ff88";
+      ctx.font = `${fontSize}px Courier New`;
+
+      for (let i = 0; i < drops.length; i++) {
+        const text = Math.random() > 0.5 ? "0" : "1";
+        ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+        if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+          drops[i] = 0;
+        }
+
+        drops[i]++;
+      }
+
+      requestAnimationFrame(drawMatrix);
+    }
+
+    drawMatrix();
+  </script>
+</body>
+</html>
