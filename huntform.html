@@ -176,6 +176,8 @@ Mohamed Badruddin
       responseMessage.textContent = '';
       responseMessage.classList.remove('opacity-100');
       spinnerOverlay.classList.remove('hidden');
+        submitSound.play();
+
      
 
       const formData = new FormData(form);
@@ -199,8 +201,7 @@ Mohamed Badruddin
         console.error('Error:', error);
       }
     });
-     submitSound.play();
-
+   
 
     const canvas = document.getElementById("binaryCanvas");
     const ctx = canvas.getContext("2d");
@@ -238,6 +239,7 @@ Mohamed Badruddin
 </body>
 
 </html>
+
 
 
 
