@@ -107,7 +107,7 @@
   </div>
 
   <!-- Sound -->
-  <audio id="submitSound" src="suii-by-cristiano-ronaldo-123253.mp3"></audio>
+  <audio id="submitSound" src="vartaa-mame-durr-made-with-Voicemod.mp3"></audio>
 
   <script>
     // GSAP animation
@@ -176,7 +176,7 @@ Mohamed Badruddin
       responseMessage.textContent = '';
       responseMessage.classList.remove('opacity-100');
       spinnerOverlay.classList.remove('hidden');
-      submitSound.play();
+     
 
       const formData = new FormData(form);
 
@@ -199,6 +199,7 @@ Mohamed Badruddin
         console.error('Error:', error);
       }
     });
+     submitSound.play();
 
 
     const canvas = document.getElementById("binaryCanvas");
@@ -237,6 +238,7 @@ Mohamed Badruddin
 </body>
 
 </html>
+
 
 
 
